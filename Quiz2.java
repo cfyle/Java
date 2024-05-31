@@ -19,7 +19,12 @@ public class Quiz2 {
 		System.out.println("총 사과의 개수는?");
 		int apple = s.nextInt();
 		
-		System.out.println("포장된 사과 박스 : " + (apple / box) + "개, 포장되지 않은 사과 개수 : " + (apple % box) + "개"); 
+		int fullBox = apple / 10;
+		int  = apple % 10;
+		
+		
+		
+		System.out.println("포장된 사과 박스 : " + fullBox + "개, 포장되지 않은 사과 개수 : " +  + "개"); 
 		
 		
 	}

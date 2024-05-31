@@ -17,6 +17,8 @@ public class Quiz5 {
 		
 		System.out.printf("구의 부피는 : %.2f", + (4 / 3) * (r * r * r) * 3.14);
 		
+		// 										4.0 /3.0
+		
 		
 	}
 }

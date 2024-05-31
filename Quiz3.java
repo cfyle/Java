@@ -9,12 +9,16 @@ public class Quiz3 {
 		Scanner s = new Scanner(System.in);
 		
 		System.out.println("키를 입력하세요.");
-		float height = s.nextInt(); 
-		float inch = height / 2.54f;
-		float ft = inch / 12f;
+		double height = s.nextDouble(); 
+		double inch = height / 2.54f;
+		double ft = inch / 12f;
 		
 		System.out.printf("당신의 키는 : %.2f cm \n", height);
 		System.out.printf("당신의 키는 : %.2f inch \n", inch);
 		System.out.printf("당신의 키는 : %.2f ft \n", ft);
+		
+		// System.out.println("당신의 키는 : " + height);
+		// System.out.println("당신의 키는 : " + inch);
+		// System.out.println("당신의 키는 : " + ft);
 	}
 }

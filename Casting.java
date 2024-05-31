@@ -5,7 +5,7 @@ public class Casting {
 		int three = (int) pi; // 명시적 형변환
 		System.out.println(three);
 		
-		int num = 128;
+		int num = 855;
 		
 		byte b = (byte)num;
 		

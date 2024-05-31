@@ -20,5 +20,8 @@ public class Quiz4 {
 		System.out.printf("%d%d%d%d%d", f, e, d, c, b);
 		
 		
+		
+		
+		
 	}
 }

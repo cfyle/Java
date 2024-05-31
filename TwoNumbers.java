@@ -20,7 +20,7 @@ public class TwoNumbers {
 		int num2 = scanner.nextInt();
 		
 		System.out.println("입력하신 숫자는 " + num1 + "와 " + num2 + " 합은 " +(num1 + num2));
-		System.out.println("두 수의 합은 " + num1 + num2);
+		System.out.println("두 수의 합은 " + (num1 + num2));
 		
 	}
 }

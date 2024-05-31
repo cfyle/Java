@@ -13,5 +13,12 @@ public class AutoCasting {
 		//int var = zero; // 컴파일 에러 
 		
 		System.out.println(f);
+		
+		
+		// float pi = 3.14F;
+		// long three = pi; // 컴파일 에러
+		// long zero = 0L;
+		// int var = zero; // 컴파일 에러
+		
 	}
 }

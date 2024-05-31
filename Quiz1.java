@@ -11,7 +11,7 @@ public class Quiz1 {
 		Scanner s = new Scanner(System.in);
 		
 		System.out.println("사용자의 체중은?");
-		int weight = s.nextInt();
+		double weight = s.nextDouble();
 		
 		System.out.println("사용자의 권장 단백질 섭취량은 " + (weight * 0.8) + "g ~ " + (weight * 1.5) + "g 입니다.");
 		
