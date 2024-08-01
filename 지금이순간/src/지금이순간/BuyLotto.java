@@ -22,6 +22,8 @@ import java.util.TreeSet;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -42,17 +44,18 @@ class SetFormat {
 	}
 }
 
-public class BuyLotto extends JPanel {
+public class BuyLotto extends JDialog {
 	public static final int MAX_CHECKED = 6; // 최대 체크 가능한 체크박스 개수
 	private List<JCheckBox> allCheckBoxes = new ArrayList<>(); // 모든 체크박스를 담는 리스트
 	private Map<JPanel, Integer> panelCheckedCount = new HashMap<>(); // 각 패널의 체크된 개수 관리
 	private Map<JPanel, Set<Integer>> panelCheckedNumbers = new LinkedHashMap<>(); // 각 패널과 체크된 번호를 매핑
 	private JPanel[] panels; // 패널을 저장할 배열
-	private Menu menu;
+	private int activePnlCount = 0;
+	Menu menu = new Menu();
 
-	public BuyLotto(Menu menu) {
-		this.menu = menu;
-		setSize(1100, 600);
+	public BuyLotto(JFrame parent) {
+		super(parent, "로또", true);
+		setSize(1200, 600);
 		setLayout(new BorderLayout(0, 0));
 
 		initializeNorthPanel();
@@ -73,20 +76,15 @@ public class BuyLotto extends JPanel {
 		JButton btnBuyLotto = new JButton("구매 확정");
 		pnlNorth.add(btnBuyLotto, BorderLayout.WEST);
 
+		// 메인 버튼
 		JButton btnMain = new JButton("메인으로");
 		pnlNorth.add(btnMain, BorderLayout.EAST);
 
-		btnMain.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-			}
-		});
-
+		// 구매확정버튼
 		btnBuyLotto.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				int check = 0;
 				StringBuilder result = new StringBuilder("각 패널에서 선택된 번호:\n");
 				File file = new File("./");
 				File creatFolder = new File(file, "Lotto");
@@ -95,7 +93,7 @@ public class BuyLotto extends JPanel {
 				}
 
 				File customerFile = new File(creatFolder, "lotto.txt"); // 경로 구분자를 '/'로 통일합니다.
-				System.out.println(customerFile.getPath());
+
 				try (FileWriter writer = new FileWriter(customerFile)) {
 					// 각 패널의 체크된 번호를 가져와서 결과 문자열에 추가
 					for (int i = 0; i < panels.length; i++) {
@@ -106,14 +104,14 @@ public class BuyLotto extends JPanel {
 
 						// 체크된 번호를 포함시키는 로직
 						if (btnCancel.isEnabled()) { // 로또 구매 취소 버튼이 활성화
-							if (btnAuto.isEnabled()) { // 자동 버튼이 비활성화된 경우
-								if (checkedNumbers.size() != 6) {
+							if (btnAuto.isEnabled()) { // 자동 버튼이 비활성화된 경우 수동
+								if (checkedNumbers.size() < 6) {
 									JOptionPane.showMessageDialog(BuyLotto.this, "6개 선택바랍니다");
+									break;
 								} else {
-									result.append("구매 수 동 ").append(i + 1).append(": ");
-									result.append(checkedNumbers.toString()).append("\n");
+									sbHandle(result, i, checkedNumbers, "수 동 ");
 								}
-							} else { // 자동 버튼이 비활성화된 경우
+							} else { // 자동 버튼이 활성화된 경우 자동 or 반자동
 								// 체크된 번호를 스트링 배열화 한 이후 정수화 해서 set에 넣기
 								Set<Integer> randomNumbers = new TreeSet<>();
 								String[] checkedNum = new SetFormat(checkedNumbers).toString().split(", ");
@@ -124,27 +122,26 @@ public class BuyLotto extends JPanel {
 										break;
 									}
 								}
-								if (randomNumbers.size() == 0) {
-									randomNumbers = randomNums(randomNumbers);
-									result.append("구매 자 동 ").append(i + 1).append(": ");
-									result.append(randomNumbers.toString()).append("\n");
-								} else {
-									randomNumbers = randomNums(randomNumbers);
-									result.append("구매 반자동 ").append(i + 1).append(": ");
-									result.append(randomNumbers.toString()).append("\n");
-								}
+								autoSelect(result, i, checkedNumbers, randomNumbers);
 							}
+							check++;
 						}
 					}
-
 					writer.write(result.toString());
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
+				showBuySta(check);
+				
 			}
-
 		});
 
+		btnMain.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 	}
 
 	// 중앙 패널 생성 메소드
@@ -182,6 +179,7 @@ public class BuyLotto extends JPanel {
 
 		JLabel lblCheck = new JLabel();
 		lblCheck.setHorizontalAlignment(SwingConstants.CENTER);
+		lblCheck.setFont(new Font("휴먼모음T", Font.PLAIN, 16));
 		pnlNorth.add(lblCheck);
 
 		JButton btnCancel = new JButton("구매 취소");
@@ -195,12 +193,16 @@ public class BuyLotto extends JPanel {
 			allCheckBoxes.add(check);
 		}
 
-		JPanel pnlSouth = new JPanel(new GridLayout(0, 2, 0, 0));
+		JPanel pnlSouth = new JPanel(new GridLayout(0, 3, 0, 0));
 		pnlBuy.add(pnlSouth, BorderLayout.SOUTH);
 
 		JButton btnHand = new JButton("수동");
 		btnHand.setEnabled(false);
 		pnlSouth.add(btnHand);
+
+		JButton btnReset = new JButton("초기화");
+		btnReset.setEnabled(false);
+		pnlSouth.add(btnReset);
 
 		JButton btnAuto = new JButton("자동");
 		btnAuto.setEnabled(false);
@@ -213,13 +215,16 @@ public class BuyLotto extends JPanel {
 				enableComponents(pnlBuyChk, true); // 체크박스 부분 활성화
 				btnAuto.setEnabled(true);
 				btnCancel.setEnabled(true); // 구매 취소 버튼 활성화
+				btnReset.setEnabled(true); // 리셋버튼 활성화
 				btnLotto.setEnabled(false); // 로또 구매 버튼 비활성화
+				lblCheck.setEnabled(true);
 				lblCheck.setText("0");
 
 				int nextIndex = currentIndex + 1;
 				if (nextIndex < panels.length) {
 					activatePanel(nextIndex); // 다음 패널 활성화
 				}
+				activePnlCount++;
 			}
 		});
 
@@ -240,11 +245,17 @@ public class BuyLotto extends JPanel {
 					for (int i = currentIndex; i < panels.length; i++) {
 						panels[i].setEnabled(false);
 						enableComponents(panels[i], false); // 내부 컴포넌트 비활성화
+						panelCheckedCount.put(panels[i], 0);
+						JLabel lblCheck = (JLabel) ((JPanel) panels[i].getComponent(1)).getComponent(1); // '체크 갯수' 라벨
+						lblCheck.setText("");
 					}
 				}
-				// 구매취소 버튼 누른 패널의 구매하기 버튼 활성화
+				// '구매 하기' 버튼
 				JButton btnBuy = (JButton) ((JPanel) panels[currentIndex].getComponent(1)).getComponent(0);
 				btnBuy.setEnabled(true);
+				JOptionPane.showMessageDialog(BuyLotto.this, "구매가 취소되었습니다.");
+				lblCheck.setText("");
+				activePnlCount--;
 			}
 		});
 
@@ -252,9 +263,10 @@ public class BuyLotto extends JPanel {
 		btnAuto.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				enableComponents(pnlBuyChk, false); // 체크박스 비활성화
+				enableComponentsAuto(pnlBuyChk, false); // 체크박스 비활성화
 				btnAuto.setEnabled(false); // 자동 버튼 비활성화
 				btnHand.setEnabled(true); // 수동 버튼 활성화
+				btnReset.setEnabled(false); // 초기화 버튼 비활성화
 			}
 		});
 
@@ -262,9 +274,20 @@ public class BuyLotto extends JPanel {
 		btnHand.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				enableComponents(pnlBuyChk, true); // 체크박스 활성화
+				enableComponentsAuto(pnlBuyChk, true); // 체크박스 활성화
 				btnAuto.setEnabled(true); // 자동 버튼 활성화
 				btnHand.setEnabled(false); // 수동 버튼 비활성화
+				btnReset.setEnabled(true); // 초기화 버튼 활성화
+			}
+		});
+
+		// 선택 초기화 버튼 액션 리스너 설정
+		btnReset.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				resetCheckBok(pnlBuyChk, false);
+				panelCheckedCount.put(pnlBuy, 0);
+				lblCheck.setText("0");
 			}
 		});
 
@@ -284,8 +307,8 @@ public class BuyLotto extends JPanel {
 		// If there are components needed in the south panel, initialize them here.
 		JPanel pnlSouth = new JPanel();
 
-		JLabel lblInfo = new JLabel("선택한 갯수가 구매, 취소 버튼 사이에 출력됩니다. ");
-
+		JLabel lblInfo = new JLabel("선택한 갯수가 구매, 취소 버튼 사이에 출력됩니다. // 수동에서 선택 후 자동 선택시 반자동입니다.");
+		lblInfo.setFont(new Font("휴먼모음T", Font.PLAIN, 16));
 		pnlSouth.add(lblInfo);
 		add(pnlSouth, BorderLayout.SOUTH);
 	}
@@ -312,7 +335,6 @@ public class BuyLotto extends JPanel {
 			if (source.isSelected()) {
 				if (checkedCount >= MAX_CHECKED) {
 					source.setSelected(false);
-					JOptionPane.showMessageDialog(BuyLotto.this, "로또 번호는 6개 초과 선택이 불가합니다.");
 				} else {
 					checkedNumbers.add(Integer.parseInt(source.getText()));
 					panelCheckedCount.put(panel, checkedCount + 1);
@@ -338,6 +360,24 @@ public class BuyLotto extends JPanel {
 			if (comp instanceof JPanel) {
 				enableComponents((JPanel) comp, enable); // 내부 패널에 대해 재귀 호출
 			}
+			resetCheckBok(panel, enable);
+		}
+	}
+
+	private void enableComponentsAuto(JPanel panel, boolean enable) {
+		for (Component comp : panel.getComponents()) {
+			comp.setEnabled(enable);
+			if (comp instanceof JPanel) {
+				enableComponents((JPanel) comp, enable); // 내부 패널에 대해 재귀 호출
+			}
+		}
+	}
+
+	private void resetCheckBok(JPanel panel, boolean enable) {
+		for (Component comp : panel.getComponents()) {
+			if (comp instanceof JCheckBox) {
+				((JCheckBox) comp).setSelected(false);
+			}
 		}
 	}
 
@@ -348,7 +388,9 @@ public class BuyLotto extends JPanel {
 				// 현재 패널을 활성화하고 '로또 구매' 버튼만 활성화
 				panels[i].setEnabled(true);
 				JButton btnLotto = (JButton) ((JPanel) panels[i].getComponent(1)).getComponent(0); // '로또 구매' 버튼
+				JLabel lblCheck = (JLabel) ((JPanel) panels[i].getComponent(1)).getComponent(1); // '체크 갯수' 라벨
 				btnLotto.setEnabled(true);
+				lblCheck.setEnabled(true);
 			} else if (i < indexToActivate) {
 				// 이전 패널들은 모두 활성화
 				panels[i].setEnabled(true);
@@ -367,5 +409,36 @@ public class BuyLotto extends JPanel {
 			nums.add(r.nextInt(45) + 1); // 1부터 45까지의 숫자 중 랜덤 선택
 		}
 		return nums;
+	}
+
+	// 구매확정 다이얼로그 띄우는 메소드
+	private void showBuySta(int check) {
+		if (check != 0 && check == activePnlCount) {
+			JOptionPane.showMessageDialog(BuyLotto.this, "구매가 완료되었습니다!");
+			dispose();
+			CheckMyNum checkMyNumPanel = new CheckMyNum();
+			checkMyNumPanel.showInFrame();
+		} else if (activePnlCount == 0) {
+			JOptionPane.showMessageDialog(BuyLotto.this, "아무것도 구매하시지 않았습니다.");
+			System.out.println(activePnlCount);
+		}
+	}
+
+	// 구매확정 자동 선택시 사이즈에 따른 저장
+	private void autoSelect(StringBuilder result, int i, Set<Integer> checkedNumbers, Set<Integer> randomNumbers) {
+		if (randomNumbers.size() == 0) {
+			randomNumbers = randomNums(randomNumbers);
+			sbHandle(result, i, randomNumbers, "자 동 ");
+		} else if (randomNumbers.size() == 6) {
+			sbHandle(result, i, checkedNumbers, "수 동 ");
+		} else {
+			randomNumbers = randomNums(randomNumbers);
+			sbHandle(result, i, randomNumbers, "반자동 ");
+		}
+	}
+
+	private void sbHandle(StringBuilder result, int i, Set<Integer> checkedNumbers, String mix) {
+		result.append(mix).append(i + 1).append(": ");
+		result.append(checkedNumbers.toString()).append("\n");
 	}
 }

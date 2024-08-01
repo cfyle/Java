@@ -1,31 +1,30 @@
 package 지금이순간;
 
-
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class CheckMyNum extends JPanel {
     public CheckMyNum() {
+        setLayout(new BorderLayout());
+        
         StringBuilder numbersString = new StringBuilder("고객님의 구매하신 로또 번호입니다\n\n");
         try (BufferedReader reader = new BufferedReader(new FileReader("./\\Lotto\\lotto.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("구매")) {
-                    String[] parts = line.split(":");
-                    if (parts.length == 2) {
-                        String numberPart = parts[1].trim();
-                        String index = parts[0].trim();
-                        numbersString.append(index).append(": ").append(numberPart).append("\n");
-                    }
+                String[] parts = line.split(":");
+                if (parts.length == 2) {
+                    String index = parts[0].trim();
+                    String numberPart = parts[1].trim();
+                    numbersString.append(index).append(": ").append(numberPart).append("\n");
                 }
             }
         } catch (Exception e) {
@@ -37,7 +36,35 @@ public class CheckMyNum extends JPanel {
         JTextArea textArea = new JTextArea(numbersString.toString());
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        
+
         add(scrollPane, BorderLayout.CENTER);
+
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel();
+        
+        // "부자되러가기" 버튼 생성
+        JButton btnRich = new JButton("부자되러가기");
+
+        // 버튼 클릭 이벤트 설정
+        btnRich.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // "부자되러가기" 버튼 클릭 시 실행할 동작
+                JOptionPane.showMessageDialog(CheckMyNum.this, "아직 추가 안함");
+            }
+        });
+
+        buttonPanel.add(btnRich);
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+    
+    // 메서드를 사용하여 CheckMyNum 패널을 JFrame에서 보여줍니다.
+    public void showInFrame() {
+        JFrame frame = new JFrame("내 번호 확인");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.getContentPane().add(this);
+        frame.setSize(400, 300);
+        frame.setLocationRelativeTo(null); // 화면 중앙에 배치
+        frame.setVisible(true);
     }
 }
