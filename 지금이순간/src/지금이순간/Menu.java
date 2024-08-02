@@ -26,8 +26,8 @@ public class Menu extends JFrame {
 
 		// 버튼 생성
 		JButton btnBuy = new JButton("로또사러가기");
-//		JButton btnMyNum = new JButton("내 번호 확인");
-//		JButton btnCheck = new JButton("부자되러가기");
+		JButton btnMyNum = new JButton("내 번호 확인");
+		JButton btnCheck = new JButton("부자되러가기");
 
 		// 로또 배경 이미지 추가
 		JLabel lblBackground = new JLabel();
@@ -35,8 +35,8 @@ public class Menu extends JFrame {
 
 		// 버튼 패널에 버튼 추가
 		buttonPanel.add(btnBuy);
-//		buttonPanel.add(btnMyNum);
-//		buttonPanel.add(btnCheck);
+		buttonPanel.add(btnMyNum);
+		buttonPanel.add(btnCheck);
 
 		// 메인 패널에 배경 이미지와 버튼 패널 추가
 		pnl.add(lblBackground, BorderLayout.CENTER);
@@ -52,23 +52,23 @@ public class Menu extends JFrame {
 			}
 		});
 
-//		btnMyNum.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				// 내 번호 확인 패널로 이동
-//                CheckMyNum checkMyNumPanel = new CheckMyNum();
-////              JOptionPane.showMessageDialog(Menu.this, checkMyNumPanel, "내 번호 확인", JOptionPane.PLAIN_MESSAGE);
-//				checkMyNumPanel.showInFrame();
-//			}
-//		});
-//
-//		btnCheck.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				// 부자되러가기 패널로 이동
-//				JOptionPane.showMessageDialog(Menu.this, "아직 추가 안함");
-//			}
-//		});
+		btnMyNum.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// 내 번호 확인 패널로 이동
+                CheckMyNum checkMyNumPanel = new CheckMyNum();
+//              JOptionPane.showMessageDialog(Menu.this, checkMyNumPanel, "내 번호 확인", JOptionPane.PLAIN_MESSAGE);
+				checkMyNumPanel.showInFrame();
+			}
+		});
+
+		btnCheck.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// 부자되러가기 패널로 이동
+				JOptionPane.showMessageDialog(Menu.this, "아직 추가 안함");
+			}
+		});
 
 		// 메인 프레임 설정
 		add(pnl);
